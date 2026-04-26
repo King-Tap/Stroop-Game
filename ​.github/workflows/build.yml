@@ -1,0 +1,50 @@
+name: Build Stroop Game APK
+on:
+  push:
+    branches: [ main ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Source Code
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Install Essential Tools
+        run: |
+          npm install @capacitor/core @capacitor/cli @capacitor/android
+          
+      - name: Build Web and Android
+        run: |
+          mkdir -p www
+          cp index.html www/
+          # تهيئة المشروع باسم اللعبة وحزمة الأندرويد
+          npx cap init "Stroop Game" "com.stroop.game" --web-dir www
+          npx cap add android
+          
+          # إعداد الأيقونات (يعتمد على وجود ملف icon.png في المجلد الرئيسي)
+          rm -rf android/app/src/main/res/mipmap-*
+          mkdir -p android/app/src/main/res/mipmap-hdpi
+          cp icon.png android/app/src/main/res/mipmap-hdpi/ic_launcher.png
+          cp icon.png android/app/src/main/res/mipmap-hdpi/ic_launcher_round.png
+          
+          mkdir -p android/app/src/main/res/mipmap-mdpi && cp icon.png android/app/src/main/res/mipmap-mdpi/ic_launcher.png
+          mkdir -p android/app/src/main/res/mipmap-xhdpi && cp icon.png android/app/src/main/res/mipmap-xhdpi/ic_launcher.png
+          mkdir -p android/app/src/main/res/mipmap-xxhdpi && cp icon.png android/app/src/main/res/mipmap-xxhdpi/ic_launcher.png
+          mkdir -p android/app/src/main/res/mipmap-xxxhdpi && cp icon.png android/app/src/main/res/mipmap-xxxhdpi/ic_launcher.png
+
+      - name: Final Compilation
+        run: |
+          npx cap copy
+          cd android && ./gradlew assembleDebug
+
+      - name: Download APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: Stroop-Game-APK
+          path: android/app/build/outputs/apk/debug/app-debug.apk
