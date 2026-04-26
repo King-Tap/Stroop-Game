@@ -1,0 +1,6 @@
+{
+  "appId": "com.strobe.game",
+  "appName": "strobe",
+  "webDir": "www",
+  "bundledWebRuntime": false
+}
